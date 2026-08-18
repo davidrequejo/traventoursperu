@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'Neue Plak Condensed';
+    src: local('Neue Plak Condensed Extra Black'), local('Neue-Plak-Condensed-Extra-Black'),
+        url('NeuePlak-CondExtraBlack.woff2') format('woff2'),
+        url('NeuePlak-CondExtraBlack.woff') format('woff'),
+        url('NeuePlak-CondExtraBlack.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+  }

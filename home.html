@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<title>Raices Home | En desarrollo</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style type="text/css">
+:root {
+  --ink: #16202f;
+  --muted: #657386;
+  --line: rgba(22, 32, 47, 0.12);
+  --gold: #b78a3c;
+  --gold-dark: #8b6528;
+  --paper: #f8f6f1;
+  --white: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--ink);
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  background:
+    linear-gradient(115deg, rgba(22, 32, 47, 0.08), transparent 34%),
+    radial-gradient(circle at 82% 18%, rgba(183, 138, 60, 0.22), transparent 32%),
+    linear-gradient(180deg, #fffdf8 0%, var(--paper) 100%);
+}
+
+.page {
+  display: grid;
+  min-height: 100vh;
+  padding: 34px;
+  place-items: center;
+}
+
+.panel {
+  position: relative;
+  width: min(940px, 100%);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 30px 90px rgba(22, 32, 47, 0.14);
+  backdrop-filter: blur(18px);
+}
+
+.panel::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(90deg, rgba(183, 138, 60, 0.16) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(183, 138, 60, 0.11) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(90deg, transparent, #000 18%, transparent 58%);
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  display: grid;
+  gap: 42px;
+  grid-template-columns: 1fr 270px;
+  align-items: center;
+  padding: 64px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 38px;
+  color: var(--gold-dark);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.mark {
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(183, 138, 60, 0.45);
+  border-radius: 50%;
+  background: #fffaf0;
+  color: var(--gold-dark);
+  font-size: 1rem;
+  letter-spacing: 0;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  color: var(--gold-dark);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.eyebrow::before {
+  width: 42px;
+  height: 1px;
+  content: "";
+  background: var(--gold);
+}
+
+h1 {
+  max-width: 640px;
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.55rem, 6vw, 5.4rem);
+  font-weight: 500;
+  line-height: 0.96;
+  letter-spacing: 0;
+}
+
+.lead {
+  max-width: 570px;
+  margin: 26px 0 34px;
+  color: var(--muted);
+  font-size: 1.08rem;
+  line-height: 1.8;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--white);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.btn:hover {
+  background: #0f1724;
+  box-shadow: 0 14px 34px rgba(22, 32, 47, 0.18);
+  transform: translateY(-2px);
+}
+
+.status {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.visual {
+  justify-self: end;
+  width: 100%;
+  max-width: 270px;
+  border-left: 1px solid var(--line);
+  padding-left: 42px;
+}
+
+.seal {
+  display: grid;
+  width: 180px;
+  height: 180px;
+  margin-left: auto;
+  place-items: center;
+  border: 1px solid rgba(183, 138, 60, 0.42);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(183, 138, 60, 0.12) 0 28%, transparent 29%),
+    #fffaf0;
+  color: var(--gold-dark);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 4.2rem;
+}
+
+.details {
+  display: grid;
+  gap: 18px;
+  margin-top: 42px;
+}
+
+.detail {
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.detail span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.detail strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding: 18px;
+  }
+
+  .content {
+    grid-template-columns: 1fr;
+    gap: 34px;
+    padding: 38px 26px;
+  }
+
+  .brand {
+    margin-bottom: 34px;
+  }
+
+  .visual {
+    justify-self: stretch;
+    max-width: none;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+    padding-top: 28px;
+    padding-left: 0;
+  }
+
+  .seal {
+    width: 132px;
+    height: 132px;
+    margin: 0;
+    font-size: 3rem;
+  }
+
+  .details {
+    grid-template-columns: 1fr 1fr;
+    margin-top: 26px;
+  }
+}
+
+@media (max-width: 460px) {
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+
+  .details {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+<main class="page">
+  <section class="panel" aria-labelledby="titulo">
+    <div class="content">
+      <div>
+        <div class="brand"><span class="mark">R</span> Raices Home</div>
+        <div class="eyebrow">Sitio web</div>
+        <h1 id="titulo">Estamos en desarrollo</h1>
+        <p class="lead">Estamos preparando una experiencia m&aacute;s clara, elegante y &uacute;til para nuestros clientes. Muy pronto encontrar&aacute;s aqu&iacute; toda la informaci&oacute;n de Raices Home.</p>
+        <div class="actions">
+          <a class="btn" href="#">Ingresar al panel</a>
+          <span class="status">Gracias por tu paciencia.</span>
+        </div>
+      </div>
+
+      <aside class="visual" aria-label="Estado del sitio">
+        <div class="seal" aria-hidden="true">R</div>
+        <div class="details">
+          <div class="detail">
+            <span>Estado</span>
+            <strong>En construcci&oacute;n</strong>
+          </div>
+          <div class="detail">
+            <span>Acceso</span>
+            <strong>Panel disponible</strong>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+</main>
+</body>
+</html>

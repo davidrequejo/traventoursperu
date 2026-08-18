@@ -1,0 +1,77 @@
+# Comandos para instalar Laravel 11 + Jetstream en Laragon
+# Proyecto: Raices Home
+# Base de datos: raices_home
+# Usuario MySQL: root
+# Password MySQL: vacio
+
+# 1. Entrar a la carpeta de Laragon donde van los proyectos.
+cd C:\laragon\www
+
+# 2. Crear un proyecto Laravel 11 en una carpeta temporal.
+# Se usa carpeta temporal porque raices_home ya no estaba vacia.
+composer create-project laravel/laravel:^11.0 temp_laravel
+
+# 3. Entrar a la carpeta real del proyecto.
+cd C:\laragon\www\raices_home
+
+# 4. Copiar los archivos de Laravel desde la carpeta temporal al proyecto real.
+Copy-Item -Path .\..\temp_laravel\* -Destination . -Recurse -Force
+Copy-Item -Path .\..\temp_laravel\.* -Destination . -Recurse -Force
+
+# 5. Eliminar la carpeta temporal despues de copiar los archivos.
+Remove-Item -Path .\..\temp_laravel -Recurse -Force
+
+# 6. Instalar Jetstream.
+# Jetstream agrega login, registro, perfil, sesiones, recuperacion de password, etc.
+composer require laravel/jetstream
+
+# 7. Instalar Jetstream con Livewire.
+# Livewire es practico si vas a trabajar con Blade y PHP.
+php artisan jetstream:install livewire
+
+# 8. Instalar dependencias frontend.
+# Esto instala lo necesario para compilar CSS/JS: Vite, Tailwind, etc.
+npm install
+
+# 9. Compilar assets frontend para que Jetstream y los estilos carguen bien.
+npm run build
+
+# 10. Configurar la base de datos en el archivo .env.
+# Debe quedar asi:
+# DB_CONNECTION=mysql
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=raices_home
+# DB_USERNAME=root
+# DB_PASSWORD=
+
+# 11. Crear las tablas en MySQL.
+# Esto crea users, sessions, cache, jobs, tokens, etc.
+php artisan migrate
+
+# 12. Limpiar caches de Laravel despues de cambiar .env o vistas.
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+
+# 13. Levantar el servidor local con Artisan.
+# Abre el proyecto en http://127.0.0.1:8000
+php artisan serve
+
+# 14. Si usas Laragon con virtual hosts, tambien puedes abrir:
+# http://raices_home.test
+
+# 15. Durante desarrollo, si vas a modificar CSS/JS, usa este comando en otra terminal.
+npm run dev
+
+# Opcional: Jetstream con equipos.
+# Usar este comando en lugar de "php artisan jetstream:install livewire".
+php artisan jetstream:install livewire --teams
+
+# Opcional: Jetstream con modo oscuro.
+# Usar este comando en lugar de "php artisan jetstream:install livewire".
+php artisan jetstream:install livewire --dark
+
+# Opcional: Jetstream con equipos y modo oscuro.
+# Usar este comando en lugar de "php artisan jetstream:install livewire".
+php artisan jetstream:install livewire --teams --dark

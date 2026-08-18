@@ -1,0 +1,267 @@
+CREATE TABLE IF NOT EXISTS `raices_home`.`rdocumento` (
+  `idrdocumento` BIGINT NOT NULL AUTO_INCREMENT,
+  `idpersona_cliente` BIGINT NOT NULL,
+  `idsunat_c01` BIGINT NOT NULL,
+  `origen` VARCHAR(100) NULL COMMENT 'facturacion, venta, cobranza_cuota',
+  `crear_enviar_sunat` VARCHAR(2) NULL COMMENT 'envio autumatico al crear el documento: SI, NO',
+  `tipo_comprobante` VARCHAR(3) NULL COMMENT 'Esto pueden ser: Factura, Boleta, Tiket, etc. y esta enlazado al codigo de sunat',
+  `serie_comprobante` VARCHAR(15) NULL,
+  `numero_comprobante` VARCHAR(10) NULL COMMENT 'Esto es autoincrementable segun se vayan creado los documentos de venta.',
+  `fecha_emision` DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de emision del comprobante',
+  `impuesto` DECIMAL(4,2) NULL DEFAULT 0 COMMENT 'el impuesto puede ser: 18% o 0% segun la zona geografica.',
+  `venta_subtotal` DECIMAL(20,2) NULL DEFAULT 0,
+  `venta_descuento` DECIMAL(20,2) NULL DEFAULT 0,
+  `venta_igv` DECIMAL(20,2) NULL DEFAULT 0,
+  `venta_total` DECIMAL(20,2) NULL DEFAULT 0,
+  `venta_cuotas` ENUM('contado', 'credito') NULL COMMENT 'es una venta a credito: SI y NO',
+  `vc_cantidad_total` INT NULL DEFAULT 0 COMMENT 'Cantidad total de cuotas agregadas a pagar',
+  `vc_cantidad_pagada` INT NULL DEFAULT 0 COMMENT 'Cantidad total de cuotas que fueron pagadas',
+  `vc_estado` ENUM('pendiente', 'parcial', 'pagado') NULL DEFAULT 'pendiente' COMMENT 'Estado del documento si esta pagado al contado o credito',
+  `total_recibido` DECIMAL(20,2) NULL DEFAULT 0,
+  `total_vuelto` DECIMAL(20,2) NULL DEFAULT 0,
+  `idsunat_c51` BIGINT NULL COMMENT 'Código de tipo de factura: Venta lnterna, Venta Interna – Anticipos',
+  `ua_deduce_anticipos` ENUM('SI', 'NO') NULL DEFAULT 'NO' COMMENT 'SI cuando el comprobante final deduce anticipos',
+  `ant_es_anticipo` ENUM('SI', 'NO') NULL DEFAULT 'NO' COMMENT 'SI cuando este comprobante se emite por pago anticipado',
+  `ant_monto_original` DECIMAL(20,2) NULL DEFAULT 0 COMMENT 'Monto total emitido como anticipo',
+  `ant_monto_aplicado` DECIMAL(20,2) NULL DEFAULT 0 COMMENT 'Monto del anticipo ya aplicado en comprobantes finales',
+  `ant_monto_saldo` DECIMAL(20,2) NULL DEFAULT 0 COMMENT 'Saldo disponible del anticipo',
+  `ant_estado` ENUM('no_aplica', 'disponible', 'parcial', 'aplicado', 'anulado') NULL DEFAULT 'no_aplica' COMMENT 'Estado de uso del anticipo',
+  `ua_total_bruto` DECIMAL(20,2) NULL DEFAULT 0 COMMENT 'Total de la operacion antes de deducir anticipos',
+  `ua_monto_disponible_total` DECIMAL(20,2) NULL DEFAULT 0 COMMENT 'Total de anticipos disponibles al momento de crear el documento',
+  `ua_monto_deducido` DECIMAL(20,2) NULL DEFAULT 0 COMMENT 'Total de anticipos deducidos en el comprobante final',
+  `ua_total_pagar` DECIMAL(20,2) NULL DEFAULT 0 COMMENT 'Total final despues de deducir anticipos',
+  `idsunat_c09` BIGINT NULL COMMENT 'llave del motivo de nota de credito',
+  `nc_tipo_comprobante` VARCHAR(3) NULL COMMENT 'codigo de comprobante',
+  `nc_serie_y_numero` VARCHAR(30) NULL COMMENT 'serie y numero: B001-1 o F001-1',
+  `cot_tiempo_entrega` VARCHAR(100) NULL,
+  `cot_validez` VARCHAR(100) NULL,
+  `cot_estado` ENUM('pendiente', 'vendido') NULL,
+  `idsunat_c18` BIGINT NULL COMMENT 'llave de modalidad de transporte',
+  `idsunat_c20` BIGINT NULL COMMENT 'llave de motivo de traslado',
+  `gr_peso_total` DECIMAL(20,2) NULL DEFAULT 0 COMMENT 'peso del paquete',
+  `gr_peso_total_um` VARCHAR(5) NULL DEFAULT 'KGM' COMMENT 'unidad de medida del paquete',
+  `gr_idconductor` INT NULL COMMENT 'id persona del conductor',
+  `gr_placa` VARCHAR(45) NULL COMMENT 'placa de vehiculo',
+  `gr_numero_licencia` VARCHAR(15) NULL COMMENT 'dato del conductor',
+  `gr_partida_direccion` VARCHAR(200) NULL,
+  `gr_partida_distrito` VARCHAR(100) NULL,
+  `gr_partida_ubigeo` VARCHAR(15) NULL,
+  `gr_llegada_direccion` VARCHAR(200) NULL,
+  `gr_llegada_distrito` VARCHAR(100) NULL,
+  `gr_llegada_ubigeo` VARCHAR(15) NULL,
+  `sunat_estado` VARCHAR(15) NULL DEFAULT 'ACEPTADA' COMMENT 'ACEPTADA, OBSERVACIONES, RECHAZADA, Excepción, POR ENVIAR',
+  `sunat_observacion` VARCHAR(500) NULL,
+  `sunat_code` VARCHAR(10) NULL COMMENT 'entre: 0100 y 3999',
+  `sunat_mensaje` VARCHAR(500) NULL COMMENT 'La Factura numero F001-1, ha sido aceptada',
+  `sunat_hash` VARCHAR(100) NULL COMMENT 'algo como este: ZGvohIEmi8acXgG++JMg9Pmyx4c=',
+  `sunat_error` TEXT NULL COMMENT 'Si se registra esto, no se envio el doc a la SUNAT',
+  `observacion_documento` TEXT NULL COMMENT 'Observacion del propio documento',
+  `estado_trash` CHAR(1) NOT NULL DEFAULT '1',
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_trash` INT NULL DEFAULT NULL,
+  `user_created` INT NOT NULL,
+  `user_updated` INT NULL DEFAULT NULL,
+  PRIMARY KEY (`idrdocumento`),
+  INDEX `fk_rdocumento_sunat_c01_tipo_comprobante1_idx` (`idsunat_c01` ASC) VISIBLE,
+  INDEX `fk_rdocumento_sunat_c09_codigo_nota_credito1_idx` (`idsunat_c09` ASC) VISIBLE,
+  INDEX `fk_rdocumento_sunat_c18_codigo_modalidad_transporte1_idx` (`idsunat_c18` ASC) VISIBLE,
+  INDEX `fk_rdocumento_sunat_c20_codigo_motivo_traslado1_idx` (`idsunat_c20` ASC) VISIBLE,
+  INDEX `fk_rdocumento_sunat_c51_tipo_operacion1_idx` (`idsunat_c51` ASC) VISIBLE,
+  CONSTRAINT `fk_rdocumento_sunat_c01_tipo_comprobante1`
+    FOREIGN KEY (`idsunat_c01`)
+    REFERENCES `raices_home`.`sunat_c01_tipo_comprobante` (`idsunat_c01_tipo_comprobante`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_rdocumento_sunat_c09_codigo_nota_credito1`
+    FOREIGN KEY (`idsunat_c09`)
+    REFERENCES `raices_home`.`sunat_c09_codigo_nota_credito` (`idsunat_c09_codigo_nota_credito`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_rdocumento_sunat_c18_codigo_modalidad_transporte1`
+    FOREIGN KEY (`idsunat_c18`)
+    REFERENCES `raices_home`.`sunat_c18_codigo_modalidad_transporte` (`idsunat_c18_codigo_modalidad_transporte`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_rdocumento_sunat_c20_codigo_motivo_traslado1`
+    FOREIGN KEY (`idsunat_c20`)
+    REFERENCES `raices_home`.`sunat_c20_codigo_motivo_traslado` (`idsunat_c20_codigo_motivo_traslado`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_rdocumento_sunat_c51_tipo_operacion1`
+    FOREIGN KEY (`idsunat_c51`)
+    REFERENCES `raices_home`.`sunat_c51_tipo_operacion` (`idsunat_c51_tipo_operacion`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+
+CREATE TABLE IF NOT EXISTS `raices_home`.`rdocumento_detalle` (
+  `idrdocumento_detalle` BIGINT NOT NULL AUTO_INCREMENT,
+  `idrdocumento` BIGINT NOT NULL,
+  `idlote` BIGINT NULL,
+  `idproducto` BIGINT NULL,
+  `descripcion` VARCHAR(250) NULL COMMENT 'Nombre producto',
+  `v_tipo_comprobante` VARCHAR(40) NULL COMMENT 'Son: boleta, factura, cotizacion, nota_credito',
+  `v_fecha_emision` DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de emision del comprobante',
+  `cantidad` DECIMAL(20,2) NULL DEFAULT 0,
+  `precio_compra` DECIMAL(20,2) NULL DEFAULT 0 COMMENT 'Precio unitario: compra',
+  `precio_venta` DECIMAL(20,2) NULL DEFAULT 0 COMMENT 'Precio unitario: venta',
+  `precio_venta_descuento` DECIMAL(20,2) NULL DEFAULT 0 COMMENT 'Precio unitario - descuento: venta',
+  `descuento` DECIMAL(20,2) NULL DEFAULT 0 COMMENT 'formato: numerico',
+  `descuento_porcentaje` DECIMAL(20,2) NULL DEFAULT 0 COMMENT 'formato: porcentaje',
+  `subtotal` DECIMAL(20,2) NULL DEFAULT 0 COMMENT 'se a aplicado el descuento',
+  `subtotal_no_descuento` DECIMAL(20,2) NULL DEFAULT 0 COMMENT 'no tiene descuento',
+  PRIMARY KEY (`idrdocumento_detalle`),
+  INDEX `fk_venta_detalle_venta1_idx` (`idrdocumento` ASC) VISIBLE,
+  INDEX `fk_venta_detalle_producto1_idx` (`idproducto` ASC) VISIBLE,
+  INDEX `fk_rdocumento_detalle_lote1_idx` (`idlote` ASC) VISIBLE,
+  CONSTRAINT `fk_venta_detalle_venta1`
+    FOREIGN KEY (`idrdocumento`)
+    REFERENCES `raices_home`.`rdocumento` (`idrdocumento`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_venta_detalle_producto1`
+    FOREIGN KEY (`idproducto`)
+    REFERENCES `raices_home`.`producto` (`idproducto`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_rdocumento_detalle_lote1`
+    FOREIGN KEY (`idlote`)
+    REFERENCES `raices_home`.`lote` (`idlote`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+
+CREATE TABLE IF NOT EXISTS `raices_home`.`producto` (
+  `idproducto` BIGINT NOT NULL AUTO_INCREMENT,
+  `idsunat_c03` BIGINT NOT NULL,
+  `idcategoria` BIGINT NOT NULL,
+  `idmarca` BIGINT NOT NULL,
+  `tipo` CHAR(2) NULL COMMENT 'SR = Servicio\nPR = Producto',
+  `codigo` VARCHAR(50) NULL DEFAULT 'generado por el sistema' COMMENT 'Codigo genrado por el sistema',
+  `codigo_alterno` VARCHAR(50) NULL DEFAULT 'manual' COMMENT 'Codigo creado por el cliente',
+  `nombre` VARCHAR(250) NULL COMMENT 'No debe llevar caracteres especiales',
+  `stock` DECIMAL(11,2) NULL,
+  `stock_minimo` DECIMAL(11,2) NULL COMMENT 'Para ponerse en rojo y estar alerta',
+  `precio_compra` DECIMAL(11,2) NULL,
+  `precio_venta` DECIMAL(11,2) NULL,
+  `descripcion_adicional` VARCHAR(250) NULL,
+  `imagen` VARCHAR(100) NULL,
+  `estado_trash` CHAR(1) NOT NULL DEFAULT '1',
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_trash` INT NULL DEFAULT NULL,
+  `user_created` INT NOT NULL,
+  `user_updated` INT NULL DEFAULT NULL,
+  PRIMARY KEY (`idproducto`),
+  INDEX `fk_producto_sunat_unidad_medida1_idx` (`idsunat_c03` ASC) VISIBLE,
+  INDEX `fk_producto_categoria1_idx` (`idcategoria` ASC) VISIBLE,
+  INDEX `fk_producto_marca1_idx` (`idmarca` ASC) VISIBLE,
+  CONSTRAINT `fk_producto_sunat_unidad_medida1`
+    FOREIGN KEY (`idsunat_c03`)
+    REFERENCES `raices_home`.`sunat_c03_unidad_medida` (`idsunat_c03_unidad_medida`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_producto_categoria1`
+    FOREIGN KEY (`idcategoria`)
+    REFERENCES `raices_home`.`categoria` (`idcategoria`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_producto_marca1`
+    FOREIGN KEY (`idmarca`)
+    REFERENCES `raices_home`.`marca` (`idmarca`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+
+CREATE TABLE IF NOT EXISTS `raices_home`.`sunat_c03_unidad_medida` (
+  `idsunat_c03_unidad_medida` BIGINT NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(100) NULL,
+  `abreviatura` CHAR(5) NULL,
+  `equivalencia` DECIMAL(14,2) NULL,
+  `descripcion` VARCHAR(250) NULL,
+  `estado` CHAR(1) NULL DEFAULT '1',
+  `estado_delete` CHAR(1) NULL DEFAULT '1',
+  `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_trash` INT NULL DEFAULT NULL,
+  `user_delete` INT NULL DEFAULT NULL,
+  `user_created` INT NULL DEFAULT NULL,
+  `user_updated` INT NULL DEFAULT NULL,
+  PRIMARY KEY (`idsunat_c03_unidad_medida`))
+ENGINE = InnoDB
+
+CREATE TABLE IF NOT EXISTS `raices_home`.`rdocumento_relacionado` (
+  `idrdocumento_relacionado` BIGINT NOT NULL AUTO_INCREMENT,
+  `idrdocumento` BIGINT NULL,
+  `idrdocumento_r` BIGINT NULL,
+  `idsunat_c12` BIGINT NULL,
+  `tipo_relacion` ENUM('general', 'nota_credito', 'nota_debito', 'anticipo_deducido') NULL DEFAULT 'general',
+  `serie_numero_relacionado` VARCHAR(30) NULL,
+  `orden_xml` INT NULL DEFAULT 1,
+  `monto_original` DECIMAL(20,2) NULL DEFAULT 0,
+  `monto_aplicado` DECIMAL(20,2) NULL DEFAULT 0,
+  `estado_relacion` ENUM('activo', 'anulado') NULL DEFAULT 'activo',
+  PRIMARY KEY (`idrdocumento_relacionado`),
+  INDEX `fk_venta_relacionado_venta1_idx` (`idrdocumento` ASC) VISIBLE,
+  INDEX `fk_venta_relacionado_venta2_idx` (`idrdocumento_r` ASC) VISIBLE,
+  INDEX `fk_rdocumento_relacionado_sunat_c12_documento_relacionado1_idx` (`idsunat_c12` ASC) VISIBLE,
+  CONSTRAINT `fk_venta_relacionado_venta1`
+    FOREIGN KEY (`idrdocumento`)
+    REFERENCES `raices_home`.`rdocumento` (`idrdocumento`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_venta_relacionado_venta2`
+    FOREIGN KEY (`idrdocumento_r`)
+    REFERENCES `raices_home`.`rdocumento` (`idrdocumento`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_rdocumento_relacionado_sunat_c12_documento_relacionado1`
+    FOREIGN KEY (`idsunat_c12`)
+    REFERENCES `raices_home`.`sunat_c12_documento_relacionado` (`idsunat_c12_documento_relacionado`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+
+CREATE TABLE IF NOT EXISTS `raices_home`.`sunat_c01_tipo_comprobante` (
+  `idsunat_c01_tipo_comprobante` BIGINT NOT NULL AUTO_INCREMENT,
+  `codigo` VARCHAR(3) NULL DEFAULT NULL,
+  `nombre` VARCHAR(300) NULL,
+  `abreviatura` VARCHAR(100) NULL,
+  `serie` VARCHAR(10) NULL,
+  `numero` INT NULL,
+  `un1001` VARCHAR(45) NULL DEFAULT NULL,
+  `estado_trash` CHAR(1) NOT NULL DEFAULT '1',
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_trash` INT NULL DEFAULT NULL,
+  `user_created` INT NOT NULL,
+  `user_updated` INT NULL DEFAULT NULL,
+  PRIMARY KEY (`idsunat_c01_tipo_comprobante`))
+ENGINE = InnoDB
+
+CREATE TABLE IF NOT EXISTS `raices_home`.`sunat_c12_documento_relacionado` (
+  `idsunat_c12_documento_relacionado` BIGINT NOT NULL AUTO_INCREMENT,
+  `codigo` VARCHAR(2) NULL,
+  `descripcion` VARCHAR(200) NULL,
+  `estado_trash` CHAR(1) NOT NULL DEFAULT '1',
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_trash` INT NULL DEFAULT NULL,
+  `user_created` INT NULL DEFAULT NULL,
+  `user_updated` INT NULL DEFAULT NULL,
+  PRIMARY KEY (`idsunat_c12_documento_relacionado`))
+ENGINE = InnoDB
+
+CREATE TABLE IF NOT EXISTS `raices_home`.`sunat_c51_tipo_operacion` (
+  `idsunat_c51_tipo_operacion` BIGINT NOT NULL AUTO_INCREMENT,
+  `codigo` VARCHAR(4) NULL,
+  `descripcion` VARCHAR(200) NULL,
+  `estado_trash` CHAR(1) NOT NULL DEFAULT '1',
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_trash` INT NULL DEFAULT NULL,
+  `user_created` INT NULL DEFAULT NULL,
+  `user_updated` INT NULL DEFAULT NULL,
+  PRIMARY KEY (`idsunat_c51_tipo_operacion`))
+ENGINE = InnoDB
