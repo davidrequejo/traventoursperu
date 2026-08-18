@@ -1,0 +1,106 @@
+## ============ Comandos para dejar listo para produccion ============
+
+## Antes de ejecutar, verificar en .env del servidor:
+## APP_ENV=production
+## APP_DEBUG=false
+
+composer install --no-dev --optimize-autoloader
+npm ci
+npm run build
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan event:cache
+
+## Verificar que Livewire siga cargando y que el sourcemap no quede expuesto.
+php artisan route:list --path=livewire
+
+## Probar en navegador:
+## https://tu-dominio.com/livewire/livewire.min.js.map
+## Debe responder 404 o bloqueado, no debe mostrar "version: 3".
+
+
+## ============ Archivos/carpetas que debo subir al servidor ============
+
+## Subir siempre que haya cambios de codigo:
+app/
+bootstrap/
+config/
+database/
+lang/
+public/
+resources/
+routes/
+storage/app/public/   ## Solo si hay archivos publicos nuevos del sistema.
+composer.json
+composer.lock
+package.json
+package-lock.json
+artisan
+vite.config.js
+postcss.config.js
+tailwind.config.js
+
+## Si el servidor NO tiene SSH o NO puedes ejecutar composer install, tambien subir:
+vendor/
+
+## Si ya ejecutaste npm run build localmente, asegurate de subir:
+public/build/
+
+## Para el cambio del bloqueo de sourcemaps/Livewire, minimo subir:
+app/Http/Controllers/BlockedAssetController.php
+app/Providers/AppServiceProvider.php
+public/.htaccess
+vite.config.js
+
+## Para los cambios del modulo recurso avance/consumo, minimo subir:
+app/Http/Controllers/RecursoAvanceConsumoController.php
+resources/views/recurso_avance_consumo.blade.php
+public/assets/js/recurso_avance_consumo.js
+routes/web.php
+
+
+## ============ Archivos/carpetas que NO debo subir al servidor ============
+
+.git/
+.vscode/
+node_modules/
+tests/
+backups/
+scripts/
+.tmp_*.php
+permisos_tablas.sql
+.env.nube
+README.md
+phpunit.xml
+.editorconfig
+.gitattributes
+.gitignore
+
+## No reemplazar el .env de produccion si ya existe en el servidor.
+## Solo editarlo manualmente si falta alguna variable necesaria.
+.env
+
+## ============ EJECUTAR PARA LIMPIAR CACHE ===========
+
+https://ngcontadores.jdl.pe/ejecutar_artisan_produccion.php?token=ERP_OPTIMIZA_2026_CACHE&run=1
+
+
+## ============ Comandos para regresar a desarrollo ===========
+
+## En .env local:
+## APP_ENV=local
+## APP_DEBUG=true
+
+composer install
+npm install
+php artisan optimize:clear
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+php artisan event:clear
+
+## Levantar assets en modo desarrollo.
+npm run dev
