@@ -166,7 +166,7 @@
           <div class="rounded-lg border border-white/80 bg-white/95 p-5 shadow-2xl shadow-black/12 backdrop-blur sm:p-7 md:p-8">
             <div class="mb-7 sm:mb-8">
               <a href="/" class="flex w-full items-center justify-center">
-                <img src="{{ asset('assets/images/brand-logos/logo-100x35.png') }}" alt="{{ config('app.name', 'Raices Home') }}" class="h-auto w-[180px] sm:w-[210px]">
+                <img src="{{ asset('assets/images/brand-logos/logo-100x35.png') }}" alt="{{ config('app.name', 'Traventours Peru') }}" class="h-auto w-[180px] sm:w-[210px]">
               </a>
               <p class="mt-7 text-xs font-semibold uppercase tracking-[0.22em] text-[#3f664c] sm:mt-8 sm:text-sm">
                 Bienvenido

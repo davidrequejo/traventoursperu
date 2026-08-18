@@ -41,7 +41,7 @@
       <section class="w-full rounded-lg border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/10 sm:p-8">
         <div class="mb-8 text-center">
           <a href="{{ route('login') }}" class="inline-flex items-center justify-center">
-            <img src="{{ asset('assets/images/brand-logos/logo-100x35.png') }}" alt="{{ config('app.name', 'Raices Home') }}" class="h-auto w-[70px]">
+            <img src="{{ asset('assets/images/brand-logos/logo-100x35.png') }}" alt="{{ config('app.name', 'Traventours Peru') }}" class="h-auto w-[70px]">
           </a>
 
           <p class="mt-8 text-xs font-semibold uppercase tracking-[0.22em] text-[#3f664c]">

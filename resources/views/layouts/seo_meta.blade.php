@@ -1,9 +1,9 @@
 @php
     $pageTitle = $title_page ?? $title ?? 'Panel';
-    $brandName = 'Raices Home';
-    $siteUrl = 'https://admin.raiceshome.com.pe';
-    $description = 'Raices Home es una inmobiliaria especializada en la venta de lotes urbanos en Tarapoto, departamento de San Martin. Encuentra terrenos para vivienda, inversion y crecimiento patrimonial.';
-    $keywords = 'Raices Home, inmobiliaria en Tarapoto, lotes urbanos, venta de lotes, terrenos en Tarapoto, terrenos en San Martin, bienes raices, inversion inmobiliaria, lotes para vivienda, lotes en venta';
+    $brandName = 'Traventours Peru';
+    $siteUrl = url('/');
+    $description = 'Traventours Peru es una agencia de viajes y turismo especializada en experiencias, reservas y servicios turisticos en Peru.';
+    $keywords = 'Traventours Peru, agencia de viajes, turismo en Peru, reservas turisticas, tours, viajes, experiencias turisticas';
     $logoUrl = asset('assets/images/brand-logos/logo-raices-home.png');
     $faviconUrl = asset('assets/images/brand-logos/logo-36x36.png');
     $appleIconUrl = asset('assets/images/app-download/icon-192x192.png');
@@ -30,7 +30,7 @@
 <meta name="geo.placename" content="Tarapoto, San Martin, Peru">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="{{ $brandName }} - Venta de lotes urbanos en Tarapoto">
+<meta property="og:title" content="{{ $brandName }} - Agencia de viajes y turismo">
 <meta property="og:description" content="{{ $description }}">
 <meta property="og:image" content="{{ $logoUrl }}">
 <meta property="og:url" content="{{ $siteUrl }}">
@@ -38,14 +38,14 @@
 <meta property="og:locale" content="es_PE">
 
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{{ $brandName }} - Inmobiliaria en Tarapoto">
+<meta name="twitter:title" content="{{ $brandName }} - Agencia de viajes y turismo">
 <meta name="twitter:description" content="{{ $description }}">
 <meta name="twitter:image" content="{{ $logoUrl }}">
 
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "RealEstateAgent",
+  "@type": "TravelAgency",
   "name": "{{ $brandName }}",
   "url": "{{ $siteUrl }}",
   "logo": "{{ $logoUrl }}",
@@ -54,26 +54,26 @@
   "areaServed": [
     {
       "@type": "City",
-      "name": "Tarapoto"
+      "name": "Peru"
     },
     {
       "@type": "AdministrativeArea",
-      "name": "San Martin"
+      "name": "Peru"
     }
   ],
   "address": {
     "@type": "PostalAddress",
-    "addressLocality": "Tarapoto",
-    "addressRegion": "San Martin",
+    "addressLocality": "Peru",
+    "addressRegion": "Peru",
     "addressCountry": "PE"
   },
   "knowsAbout": [
-    "Venta de lotes urbanos",
-    "Terrenos en Tarapoto",
-    "Inversion inmobiliaria",
-    "Bienes raices"
+    "Agencia de viajes",
+    "Turismo en Peru",
+    "Reservas turisticas",
+    "Tours"
   ],
-  "serviceType": "Venta de lotes urbanos"
+  "serviceType": "Servicios turisticos"
 }
 </script>
 
