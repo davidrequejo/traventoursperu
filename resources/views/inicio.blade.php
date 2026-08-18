@@ -64,7 +64,7 @@
               <div class="d-md-flex d-block align-items-center ">
                 <div>
                   <p class="fw-semibold fs-18 mb-0 title-body-pagina">Bienvenido</p>
-                  <span class="fs-semibold text-muted detalle-body-pagina">Panel principal del sistema Raices Home.</span>
+                  <span class="fs-semibold text-muted detalle-body-pagina">Panel principal del sistema Traventours Peru.</span>
                 </div>
               </div>
             </div>
@@ -91,7 +91,7 @@
                   <div class="welcome-panel p-4 p-lg-5">
                     <div class="welcome-content row align-items-center g-4">
                       <div class="col-lg-8">
-                        <span class="badge bg-light text-primary mb-3">Raices Home</span>
+                        <span class="badge bg-light text-primary mb-3">Traventours Peru</span>
                         <h1 class="fw-bold mb-3">Bienvenido, {{ Auth::user()?->display_name ?? 'Usuario' }}</h1>
                         <p class="fs-16 mb-4 opacity-75">
                           Nos alegra tenerte de vuelta. Desde aqui puedes administrar tus modulos,

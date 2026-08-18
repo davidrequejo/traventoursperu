@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>Demasiadas peticiones | Raices Home</title>
+    <title>Demasiadas peticiones | Traventours Peru</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/images/brand-logos/logo-36x36.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>

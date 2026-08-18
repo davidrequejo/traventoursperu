@@ -46,7 +46,7 @@
         <div x-data="{ recovery: false }">
           <div class="mb-8 text-center">
             <a href="{{ route('login') }}" class="inline-flex items-center justify-center">
-              <img src="{{ asset('assets/images/brand-logos/logo-100x35.png') }}" alt="{{ config('app.name', 'Raices Home') }}" class="h-auto w-[160px]">
+              <img src="{{ asset('assets/images/brand-logos/logo-100x35.png') }}" alt="{{ config('app.name', 'Traventours Peru') }}" class="h-auto w-[160px]">
             </a>
 
             <p class="mt-8 text-xs font-semibold uppercase tracking-[0.22em] text-[#3f664c]">

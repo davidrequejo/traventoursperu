@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>Acceso restringido | Raices Home</title>
+    <title>Acceso restringido | Traventours Peru</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/images/brand-logos/logo-36x36.png') }}">
     <style>
         :root {
@@ -103,8 +103,8 @@
 <body>
     <main class="panel" role="main">
         <div class="brand">
-            <img src="{{ asset('assets/images/brand-logos/logo-raices-home.png') }}" alt="Raices Home">
-            <span>Raices Home</span>
+            <img src="{{ asset('assets/images/brand-logos/logo-raices-home.png') }}" alt="Traventours Peru">
+            <span>Traventours Peru</span>
         </div>
 
         <div class="status">Acceso restringido</div>
