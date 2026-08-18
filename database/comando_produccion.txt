@@ -84,8 +84,7 @@ phpunit.xml
 
 ## ============ EJECUTAR PARA LIMPIAR CACHE ===========
 
-https://ngcontadores.jdl.pe/ejecutar_artisan_produccion.php?token=ERP_OPTIMIZA_2026_CACHE&run=1
-
+https://traventoursperu.jdl.pe/ejecutar_artisan_produccion.php?token=ERP_OPTIMIZA_2026_CACHE&run=1
 
 ## ============ Comandos para regresar a desarrollo ===========
 

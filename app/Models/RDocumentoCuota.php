@@ -18,6 +18,7 @@ class RDocumentoCuota extends Model
 
     protected $fillable = [
         'idrdocumento',
+        'idreserva',
         'tipo',
         'numero_cuota',
         'fecha_cuota',
@@ -33,6 +34,7 @@ class RDocumentoCuota extends Model
     {
         return [
             'idrdocumento' => 'integer',
+            'idreserva' => 'integer',
             'tipo' => 'string',
             'numero_cuota' => 'integer',
             'fecha_cuota' => 'date',
@@ -48,6 +50,11 @@ class RDocumentoCuota extends Model
     public function documento(): BelongsTo
     {
         return $this->belongsTo(RDocumento::class, 'idrdocumento', 'idrdocumento');
+    }
+
+    public function reserva(): BelongsTo
+    {
+        return $this->belongsTo(Reserva::class, 'idreserva', 'idreserva');
     }
 
     public function pagos(): HasMany

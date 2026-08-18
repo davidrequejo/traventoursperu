@@ -198,7 +198,12 @@
                         </div>
                       </div>
                       <div class="col-md-12">
-                        <label for="factura_cliente" class="form-label" id="factura_cliente_label">Cliente <sup class="text-danger">*</sup></label>
+                        <label for="factura_cliente" class="form-label" id="factura_cliente_label">
+                          <button type="button" class="badge bg-success border-0 me-1 cursor-pointer" id="btn-agregar-cliente-facturacion" title="Agregar cliente">
+                            <i class="las la-plus"></i>
+                          </button>
+                          Cliente <sup class="text-danger">*</sup>
+                        </label>
                         <select class="form-control" id="factura_cliente" name="idpersona_cliente" style="width:100%;"></select>
                       </div>
                       <div class="col-md-6">
@@ -534,6 +539,73 @@
               </table>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="modal-cliente-facturacion" tabindex="-1" aria-labelledby="modal-cliente-facturacion-label" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <form id="form-cliente-facturacion">
+            <div class="modal-header">
+              <div>
+                <h5 class="modal-title" id="modal-cliente-facturacion-label">Agregar cliente</h5>
+                <p class="text-muted fs-12 mb-0">Registra una persona para usarla en el comprobante.</p>
+              </div>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="facturacion_cliente_tipo_persona" class="form-label">Tipo persona <sup class="text-danger">*</sup></label>
+                  <select class="form-control" id="facturacion_cliente_tipo_persona" name="tipo_persona_sunat">
+                    <option value="NATURAL">Natural</option>
+                    <option value="JURIDICA">Juridica</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="facturacion_cliente_tipo_documento" class="form-label">Documento <sup class="text-danger">*</sup></label>
+                  <select class="form-control" id="facturacion_cliente_tipo_documento" name="codigo_documento_sunat">
+                    <option value="1">DNI</option>
+                    <option value="6">RUC</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="facturacion_cliente_numero_documento" class="form-label">Numero <sup class="text-danger">*</sup></label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="facturacion_cliente_numero_documento" name="numero_documento" maxlength="20">
+                    <button type="button" class="btn btn-primary" id="btn-buscar-cliente-facturacion" title="Buscar RENIEC/SUNAT">
+                      <i class="ri-search-line" id="search_facturacion_cliente"></i>
+                      <span class="spinner-border spinner-border-sm d-none" id="charge_facturacion_cliente" role="status" aria-hidden="true"></span>
+                    </button>
+                  </div>
+                  <div class="valido_novalido_facturacion_cliente mt-1"></div>
+                </div>
+                <div class="col-md-6">
+                  <label for="facturacion_cliente_celular" class="form-label">Celular</label>
+                  <input type="text" class="form-control" id="facturacion_cliente_celular" name="celular" maxlength="15">
+                </div>
+                <div class="col-12">
+                  <label for="facturacion_cliente_descripcion" class="form-label">Nombre / razon social <sup class="text-danger">*</sup></label>
+                  <input type="text" class="form-control" id="facturacion_cliente_descripcion" name="descripcion" maxlength="255">
+                </div>
+                <div class="col-12">
+                  <label for="facturacion_cliente_correo" class="form-label">Correo</label>
+                  <input type="email" class="form-control" id="facturacion_cliente_correo" name="correo" maxlength="255">
+                </div>
+                <div class="col-12">
+                  <label for="facturacion_cliente_direccion" class="form-label">Direccion</label>
+                  <textarea class="form-control" id="facturacion_cliente_direccion" name="direccion" rows="2" maxlength="500"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-sm btn-primary" id="btn-guardar-cliente-facturacion">
+                <i class="ti ti-device-floppy me-1"></i>Guardar cliente
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

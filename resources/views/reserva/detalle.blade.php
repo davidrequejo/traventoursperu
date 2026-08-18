@@ -4,7 +4,7 @@
   $totalTours = (float) $reserva->detalles->sum(fn ($detalle) => (float) $detalle->subtotal);
   $totalHotel = (float) $reserva->hoteles->sum(fn ($hotel) => (float) $hotel->precio + (float) ($hotel->adicional ?? 0));
   $pagos = $pagos ?? collect();
-  $totalPagado = (float) $pagos->sum(fn ($pago) => (float) $pago->venta_total);
+  $totalPagado = (float) $pagos->sum(fn ($pago) => (float) ($pago->reserva_monto_aplicado ?? $pago->venta_total));
   $pendiente = max($totalReserva - $totalPagado, 0);
   $porcentajePagado = $totalReserva > 0 ? round(($totalPagado / $totalReserva) * 100) : 0;
   $porcentajePendiente = $totalReserva > 0 ? max(100 - $porcentajePagado, 0) : 0;
@@ -35,6 +35,23 @@
       return '<span class="badge ' . $class . '">' . e($estado) . '</span>';
   };
 @endphp
+
+<style>
+  .reserva-pagos-table {
+    font-size: 11px;
+  }
+
+  .reserva-pagos-table thead th {
+    font-size: 11px;
+    line-height: 1.15;
+  }
+
+  .reserva-pagos-table tbody td,
+  .reserva-pagos-table tfoot th {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+</style>
 
 <div class="bg-light p-3 p-lg-4 rounded-2">
   <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
@@ -148,6 +165,9 @@
               <a class="btn btn-info btn-sm" href="{{ route('reservas.ficha', $reserva) }}" target="_blank" rel="noopener">
                 <i class="ri-file-list-3-line me-1"></i> Ficha
               </a>
+              <button type="button" class="btn btn-outline-primary btn-sm" onclick="abrirModalAsociarComprobanteReserva({{ (int) $reserva->idreserva }}, {{ number_format($pendiente, 2, '.', '') }});">
+                <i class="ri-link-m me-1"></i> Asociar comprobante
+              </button>
             </div>
           </div>
         </div>
@@ -254,7 +274,7 @@
         <h6 class="mb-0 fw-semibold">Datos de Pagos</h6>
       </div>
       <div class="table-responsive bg-white rounded-2 shadow-sm">
-        <table class="table table-striped table-hover align-middle mb-0">
+        <table class="table table-striped table-hover align-middle mb-0 reserva-pagos-table">
           <thead class="table-light">
             <tr>
               <th>#</th>
@@ -274,8 +294,11 @@
                 $codigoPago = trim((string) ($pago->tipoComprobanteSunat?->codigo ?: $pago->tipo_comprobante));
                 $estadoSunatPago = mb_strtoupper(trim((string) ($pago->sunat_estado ?: '')));
                 $esFacturaBoleta = in_array($codigoPago, ['01', '03'], true);
-                $puedeEditarPago = ! $esFacturaBoleta || in_array($estadoSunatPago, ['EMITIDO', 'EMITIDA', 'POR ENVIAR'], true);
                 $comprobantePago = trim(($pago->serie_comprobante ?? '') . '-' . ($pago->numero_comprobante ?? ''));
+                $montoAplicadoPago = (float) ($pago->reserva_monto_aplicado ?? $pago->venta_total);
+                $tipoRelacionPago = (string) ($pago->reserva_tipo_pago ?? 'pago');
+                $esAsociacionPago = $tipoRelacionPago === 'asociacion';
+                $puedeEditarPago = ! $esAsociacionPago && (! $esFacturaBoleta || in_array($estadoSunatPago, ['EMITIDO', 'EMITIDA', 'POR ENVIAR'], true));
               @endphp
               <tr>
                 <td>{{ $index + 1 }}</td>
@@ -283,15 +306,29 @@
                 <td>{{ $comprobantePago }}</td>
                 <td>{{ $fechaReservaDetalle($pago->fecha_emision) }}</td>
                 <td>{{ $pago->cliente?->descripcion ?? '-' }}</td>
-                <td class="text-end text-primary">S/ {{ number_format((float) $pago->venta_total, 2) }}</td>
-                <td>{{ $pago->observacion_documento ?: '-' }}</td>
+                <td class="text-end text-primary">
+                  S/ {{ number_format($montoAplicadoPago, 2) }}
+                  @if(abs($montoAplicadoPago - (float) $pago->venta_total) > 0.009)
+                    <div class="fs-11 text-muted">Doc: S/ {{ number_format((float) $pago->venta_total, 2) }}</div>
+                  @endif
+                </td>
+                <td>
+                  <span class="badge {{ $tipoRelacionPago === 'asociacion' ? 'bg-info-transparent' : 'bg-success-transparent' }}">
+                    {{ $tipoRelacionPago === 'asociacion' ? 'Asociado' : 'Pago' }}
+                  </span>
+                  <div class="fs-11">{{ $pago->observacion_documento ?: '-' }}</div>
+                </td>
                 <td class="text-center">{!! $badgeEstadoSunatReserva($pago->sunat_estado) !!}</td>
                 <td class="text-center">
                   <div class="btn-list d-inline-flex gap-1">
                     <button type="button" class="btn btn-sm btn-icon btn-primary-light" onclick="abrirModalImpresionReserva({{ (int) $pago->idrdocumento }}, @js($comprobantePago));" title="Imprimir comprobante">
                       <i class="ri-printer-line"></i>
                     </button>
-                    @if($puedeEditarPago)
+                    @if($esAsociacionPago)
+                      <button type="button" class="btn btn-sm btn-icon btn-danger-light" onclick="eliminarPagoReserva({{ (int) $pago->idrdocumento }});" title="Quitar asociacion">
+                        <i class="ri-link-unlink-m"></i>
+                      </button>
+                    @elseif($puedeEditarPago)
                       <button type="button" class="btn btn-sm btn-icon btn-warning-light" onclick="editarPagoReserva({{ (int) $pago->idrdocumento }});" title="Editar pago">
                         <i class="ri-edit-line"></i>
                       </button>

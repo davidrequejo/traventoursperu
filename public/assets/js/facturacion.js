@@ -44,6 +44,7 @@ function ajaxHeaders() {
 $(function () {
   inicializarFiltrosFacturacion();
   inicializarFormularioFacturaFacturacion();
+  inicializarClienteRapidoFacturacion();
   inicializarSelectsAnulacionSunatFacturacion();
   inicializarTablaFacturacion();
   inicializarModalProductosFacturacion();
@@ -105,6 +106,219 @@ function inicializarSelectsAnulacionSunatFacturacion() {
     allowClear: false,
     minimumResultsForSearch: Infinity,
     dropdownParent: $modal,
+  });
+}
+
+function inicializarClienteRapidoFacturacion() {
+  $(document).on('click', '#btn-agregar-cliente-facturacion', abrirModalClienteRapidoFacturacion);
+  $('#btn-buscar-cliente-facturacion').on('click', buscarClienteFacturacionReniecSunat);
+  $('#facturacion_cliente_numero_documento').on('keydown', function (event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      buscarClienteFacturacionReniecSunat();
+    }
+  });
+  $('#facturacion_cliente_tipo_persona').on('change', sincronizarTipoDocumentoClienteFacturacion);
+  $('#facturacion_cliente_tipo_documento').on('change', sincronizarTipoPersonaClienteFacturacion);
+  $('#form-cliente-facturacion').on('submit', guardarClienteRapidoFacturacion);
+}
+
+function abrirModalClienteRapidoFacturacion() {
+  const tipoComprobante = obtenerTipoDocumentoCreacionFacturacion();
+
+  $('#form-cliente-facturacion')[0]?.reset();
+  $('#facturacion_cliente_tipo_persona').val(tipoComprobante === '01' ? 'JURIDICA' : 'NATURAL');
+  $('#facturacion_cliente_tipo_documento').val(tipoComprobante === '01' ? '6' : '1');
+  sincronizarTipoDocumentoClienteFacturacion();
+  $('#modal-cliente-facturacion').modal('show');
+  setTimeout(function () {
+    $('#facturacion_cliente_numero_documento').trigger('focus');
+  }, 250);
+}
+
+function sincronizarTipoDocumentoClienteFacturacion() {
+  const tipoPersona = String($('#facturacion_cliente_tipo_persona').val() || '');
+  if (tipoPersona === 'JURIDICA') {
+    $('#facturacion_cliente_tipo_documento').val('6');
+  }
+}
+
+function sincronizarTipoPersonaClienteFacturacion() {
+  const tipoDocumento = String($('#facturacion_cliente_tipo_documento').val() || '');
+  if (tipoDocumento === '6') {
+    $('#facturacion_cliente_tipo_persona').val('JURIDICA');
+  }
+}
+
+function cambiarEstadoBusquedaClienteFacturacion(cargando) {
+  $('#btn-buscar-cliente-facturacion').prop('disabled', cargando);
+  $('#search_facturacion_cliente').toggleClass('d-none', cargando);
+  $('#charge_facturacion_cliente').toggleClass('d-none', !cargando);
+}
+
+function mostrarEstadoBusquedaClienteFacturacion(mensaje, tipo = 'info') {
+  const clase = tipo === 'success' ? 'text-success' : (tipo === 'danger' ? 'text-danger' : 'text-muted');
+  $('.valido_novalido_facturacion_cliente').html(`<small class="${clase}">${mensaje}</small>`);
+}
+
+function limpiarEstadoBusquedaClienteFacturacion() {
+  $('.valido_novalido_facturacion_cliente').empty();
+}
+
+function obtenerDataApiFacturacion(response) {
+  return response?.data?.data || response?.data || {};
+}
+
+function buscarClienteFacturacionReniecSunat() {
+  const tipoDocumento = String($('#facturacion_cliente_tipo_documento').val() || '');
+  const numeroDocumento = String($('#facturacion_cliente_numero_documento').val() || '').trim();
+
+  limpiarEstadoBusquedaClienteFacturacion();
+
+  if (!tipoDocumento) {
+    mostrarErrorFacturacion('Seleccione el tipo de documento.');
+    return;
+  }
+
+  if (tipoDocumento === '1' && !/^\d{8}$/.test(numeroDocumento)) {
+    mostrarEstadoBusquedaClienteFacturacion('Ingrese un DNI valido de 8 digitos.', 'danger');
+    mostrarErrorFacturacion('Ingrese un DNI valido de 8 digitos.');
+    return;
+  }
+
+  if (tipoDocumento === '6' && !/^\d{11}$/.test(numeroDocumento)) {
+    mostrarEstadoBusquedaClienteFacturacion('Ingrese un RUC valido de 11 digitos.', 'danger');
+    mostrarErrorFacturacion('Ingrese un RUC valido de 11 digitos.');
+    return;
+  }
+
+  if (tipoDocumento !== '1' && tipoDocumento !== '6') {
+    mostrarErrorFacturacion('Solo se puede consultar DNI o RUC.');
+    return;
+  }
+
+  cambiarEstadoBusquedaClienteFacturacion(true);
+
+  $.getJSON(apiUrl(tipoDocumento === '1' ? '/reniec/dni' : '/sunat/ruc'), tipoDocumento === '1'
+    ? { dni: numeroDocumento }
+    : { ruc: numeroDocumento })
+    .done(function (response) {
+      if (!response?.status) {
+        const mensaje = response?.message || 'No se encontraron datos para el documento.';
+        mostrarEstadoBusquedaClienteFacturacion(mensaje, 'danger');
+        mostrarErrorFacturacion(mensaje);
+        return;
+      }
+
+      if (tipoDocumento === '1') {
+        procesarRespuestaReniecClienteFacturacion(response);
+      } else {
+        procesarRespuestaSunatClienteFacturacion(response);
+      }
+    })
+    .fail(function (xhr) {
+      const mensaje = extraerPrimerErrorFacturacion(xhr) || xhr?.responseJSON?.message || 'No se pudo consultar el documento.';
+      mostrarEstadoBusquedaClienteFacturacion(mensaje, 'danger');
+      mostrarErrorFacturacion(mensaje);
+    })
+    .always(function () {
+      cambiarEstadoBusquedaClienteFacturacion(false);
+    });
+}
+
+function procesarRespuestaReniecClienteFacturacion(response) {
+  const data = obtenerDataApiFacturacion(response);
+  const nombres = String(data.nombres || data.nombre || '').trim();
+  const apellidoPaterno = String(data.apellido_paterno || data.apellidoPaterno || '').trim();
+  const apellidoMaterno = String(data.apellido_materno || data.apellidoMaterno || '').trim();
+  const nombreCompleto = [nombres, apellidoPaterno, apellidoMaterno].filter(Boolean).join(' ').trim();
+
+  if (!nombreCompleto) {
+    mostrarEstadoBusquedaClienteFacturacion('RENIEC no devolvio nombres para este DNI.', 'danger');
+    mostrarErrorFacturacion('RENIEC no devolvio nombres para este DNI.');
+    return;
+  }
+
+  $('#facturacion_cliente_tipo_persona').val('NATURAL');
+  $('#facturacion_cliente_tipo_documento').val('1');
+  $('#facturacion_cliente_descripcion').val(nombreCompleto);
+
+  if (data.direccion) {
+    $('#facturacion_cliente_direccion').val(data.direccion);
+  }
+
+  mostrarEstadoBusquedaClienteFacturacion('Datos RENIEC encontrados.', 'success');
+  mostrarOkFacturacion('Datos RENIEC encontrados.');
+}
+
+function procesarRespuestaSunatClienteFacturacion(response) {
+  const data = obtenerDataApiFacturacion(response);
+  const razonSocial = String(data.nombre_o_razon_social || data.razonSocial || data.razon_social || '').trim();
+  const direccion = String(data.direccion || data.direccion_completa || '').trim();
+  const estado = String(data.estado || '').trim().toUpperCase();
+
+  if (!razonSocial) {
+    mostrarEstadoBusquedaClienteFacturacion('SUNAT no devolvio razon social para este RUC.', 'danger');
+    mostrarErrorFacturacion('SUNAT no devolvio razon social para este RUC.');
+    return;
+  }
+
+  $('#facturacion_cliente_tipo_persona').val('JURIDICA');
+  $('#facturacion_cliente_tipo_documento').val('6');
+  $('#facturacion_cliente_descripcion').val(razonSocial);
+
+  if (direccion) {
+    $('#facturacion_cliente_direccion').val(direccion);
+  }
+
+  if (estado && estado !== 'ACTIVO') {
+    mostrarEstadoBusquedaClienteFacturacion(`RUC encontrado, estado SUNAT: ${estado}.`, 'danger');
+    mostrarErrorFacturacion(`RUC encontrado, pero el estado SUNAT es ${estado}.`);
+    return;
+  }
+
+  mostrarEstadoBusquedaClienteFacturacion('Datos SUNAT encontrados.', 'success');
+  mostrarOkFacturacion('Datos SUNAT encontrados.');
+}
+
+function guardarClienteRapidoFacturacion(event) {
+  event.preventDefault();
+  const $button = $('#btn-guardar-cliente-facturacion');
+  const form = document.getElementById('form-cliente-facturacion');
+  const formData = new FormData(form);
+
+  $button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Guardando...');
+
+  $.ajax({
+    url: apiUrl('/facturacion/clientes'),
+    method: 'POST',
+    headers: ajaxHeaders(),
+    data: formData,
+    processData: false,
+    contentType: false,
+    success: function (response) {
+      if (!response?.status) {
+        mostrarErrorFacturacion(response?.message || 'No se pudo registrar el cliente.');
+        return;
+      }
+
+      const cliente = response.data || {};
+      if (!cliente.id) {
+        mostrarErrorFacturacion('El cliente fue registrado, pero no se pudo seleccionarlo.');
+        return;
+      }
+
+      const option = new Option(cliente.text || 'Cliente registrado', cliente.id, true, true);
+      $('#factura_cliente').append(option).trigger('change');
+      $('#modal-cliente-facturacion').modal('hide');
+      mostrarOkFacturacion(response.message || 'Cliente registrado correctamente.');
+    },
+    error: function (xhr) {
+      mostrarErrorFacturacion(extraerPrimerErrorFacturacion(xhr) || xhr?.responseJSON?.message || 'Error al registrar el cliente.');
+    },
+    complete: function () {
+      $button.prop('disabled', false).html('<i class="ti ti-device-floppy me-1"></i>Guardar cliente');
+    },
   });
 }
 
@@ -1320,7 +1534,12 @@ function actualizarFormularioPorTipoDocumentoFacturacion(limpiarCliente = true) 
   const titulo = tipo === '12' ? 'Nueva nota de venta' : (tipo === '03' ? 'Nueva boleta' : 'Nueva factura');
 
   $('#titulo-formulario-facturacion').text(titulo);
-  $('#factura_cliente_label').html('Cliente <sup class="text-danger">*</sup>');
+  $('#factura_cliente_label').html(`
+    <button type="button" class="badge bg-success border-0 me-1 cursor-pointer" id="btn-agregar-cliente-facturacion" title="Agregar cliente">
+      <i class="las la-plus"></i>
+    </button>
+    Cliente <sup class="text-danger">*</sup>
+  `);
   if (limpiarCliente) {
     $('#factura_cliente').val(null).trigger('change');
   }

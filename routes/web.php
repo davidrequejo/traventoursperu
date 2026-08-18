@@ -125,7 +125,7 @@ Route::middleware(['auth:sanctum',  config('jetstream.auth_session'),   'verifie
   Route::post('/ingreso-egreso', [IngresoEgresoController::class, 'store'])->name('ingreso-egreso.store')->middleware('permiso:ingreso_y_egreso,crear');
   Route::get('/ingreso-egreso/{ingresoEgreso}', [IngresoEgresoController::class, 'show'])->name('ingreso-egreso.show')->middleware('permiso:ingreso_y_egreso,ver');
   Route::put('/ingreso-egreso/{ingresoEgreso}', [IngresoEgresoController::class, 'update'])->name('ingreso-egreso.update')->middleware('permiso:ingreso_y_egreso,editar');
-  Route::patch('/ingreso-egreso/{ingresoEgreso}', [IngresoEgresoController::class, 'update'])->name('ingreso-egreso.update')->middleware('permiso:ingreso_y_egreso,editar');
+  Route::patch('/ingreso-egreso/{ingresoEgreso}', [IngresoEgresoController::class, 'update'])->middleware('permiso:ingreso_y_egreso,editar');
   Route::delete('/ingreso-egreso/{ingresoEgreso}', [IngresoEgresoController::class, 'destroy'])->name('ingreso-egreso.destroy')->middleware('permiso:ingreso_y_egreso,eliminar');
   Route::post('/ingreso-egreso/{ingresoEgreso}/restore', [IngresoEgresoController::class, 'restore'])->name('ingreso-egreso.restore')->middleware('permiso:ingreso_y_egreso,editar');
 
@@ -279,6 +279,7 @@ Route::middleware(['auth:sanctum',  config('jetstream.auth_session'),   'verifie
   Route::get('/facturacion',                            [FacturacionController::class, 'index'])->name('facturacion.index')->middleware('permiso:facturacion,ver');
   Route::get('/facturacion/clientes',                   [FacturacionController::class, 'clientes'])->name('facturacion.clientes')->middleware('permiso:facturacion,ver');
   Route::get('/facturacion/clientes-factura',           [FacturacionController::class, 'clientesFactura'])->name('facturacion.clientes_factura')->middleware('permiso:facturacion,ver');
+  Route::post('/facturacion/clientes',                  [FacturacionController::class, 'storeClienteRapido'])->name('facturacion.clientes.store')->middleware('permiso:facturacion,crear');
   Route::get('/facturacion/productos',                  [FacturacionController::class, 'productos'])->name('facturacion.productos')->middleware('permiso:facturacion,ver');
   Route::get('/facturacion/catalogos-creacion',         [FacturacionController::class, 'catalogosCreacion'])->name('facturacion.catalogos_creacion')->middleware('permiso:facturacion,ver');
   Route::get('/facturacion/filtros',                    [FacturacionController::class, 'filtros'])->name('facturacion.filtros')->middleware('permiso:facturacion,ver');
@@ -320,6 +321,8 @@ Route::middleware(['auth:sanctum',  config('jetstream.auth_session'),   'verifie
   Route::put('/reservas/pagos/{documento}', [ReservaController::class, 'updatePago'])->name('reservas.pagos.update')->middleware('permiso:reserva,editar');
   Route::delete('/reservas/pagos/{documento}', [ReservaController::class, 'destroyPago'])->name('reservas.pagos.destroy')->middleware('permiso:reserva,eliminar');
   Route::post('/reservas/store', [ReservaController::class, 'store'])->name('reservas.store')->middleware('permiso:reserva,crear');
+  Route::get('/reservas/{reserva}/comprobantes-asociables', [ReservaController::class, 'comprobantesAsociables'])->name('reservas.comprobantes-asociables')->middleware('permiso:reserva,ver|crear|editar');
+  Route::post('/reservas/{reserva}/asociar-comprobante', [ReservaController::class, 'asociarComprobante'])->name('reservas.asociar-comprobante')->middleware('permiso:reserva,crear|editar');
   Route::get('/reservas/{reserva}/detalle-comprobante', [ReservaController::class, 'detalleComprobante'])->name('reservas.detalle-comprobante')->middleware('permiso:reserva,ver|crear|editar');
   Route::get('/reservas/{reserva}/ficha', [ReservaController::class, 'ficha'])->name('reservas.ficha')->middleware('permiso:reserva,ver');
   Route::get('/reservas/{reserva}/detalle', [ReservaController::class, 'detalle'])->name('reservas.detalle')->middleware('permiso:reserva,ver');
@@ -378,7 +381,7 @@ Route::middleware(['auth:sanctum',  config('jetstream.auth_session'),   'verifie
   Route::get('usuarios/{user}', [UserController::class, 'show'])->name('usuarios.show')->middleware('permiso:usuarios_del_sistema,ver');
   Route::post('usuarios', [UserController::class, 'store'])->name('usuarios.store')->middleware('permiso:usuarios_del_sistema,crear');
   Route::put('usuarios/{user}', [UserController::class, 'update'])->name('usuarios.update')->middleware('permiso:usuarios_del_sistema,editar');
-  Route::patch('usuarios/{user}', [UserController::class, 'update'])->name('usuarios.update')->middleware('permiso:usuarios_del_sistema,editar');
+  Route::patch('usuarios/{user}', [UserController::class, 'update'])->middleware('permiso:usuarios_del_sistema,editar');
   Route::delete('usuarios/{user}', [UserController::class, 'destroy'])->name('usuarios.destroy')->middleware('permiso:usuarios_del_sistema,eliminar');
 
   Route::apiResource('personas', PersonaController::class)
@@ -389,14 +392,14 @@ Route::middleware(['auth:sanctum',  config('jetstream.auth_session'),   'verifie
   Route::post('permisos', [PermisoController::class, 'store'])->name('permisos.store')->middleware('permiso:usuarios_del_sistema,crear');
   Route::get('permisos/{permiso}', [PermisoController::class, 'show'])->name('permisos.show')->middleware('permiso:usuarios_del_sistema,ver');
   Route::put('permisos/{permiso}', [PermisoController::class, 'update'])->name('permisos.update')->middleware('permiso:usuarios_del_sistema,editar');
-  Route::patch('permisos/{permiso}', [PermisoController::class, 'update'])->name('permisos.update')->middleware('permiso:usuarios_del_sistema,editar');
+  Route::patch('permisos/{permiso}', [PermisoController::class, 'update'])->middleware('permiso:usuarios_del_sistema,editar');
   Route::delete('permisos/{permiso}', [PermisoController::class, 'destroy'])->name('permisos.destroy')->middleware('permiso:usuarios_del_sistema,eliminar');
 
   Route::get('usuario-permisos', [UsuarioPermisoController::class, 'index'])->name('usuario-permisos.index')->middleware('permiso:usuarios_del_sistema,ver');
   Route::post('usuario-permisos', [UsuarioPermisoController::class, 'store'])->name('usuario-permisos.store')->middleware('permiso:usuarios_del_sistema,editar');
   Route::get('usuario-permisos/{usuarioPermiso}', [UsuarioPermisoController::class, 'show'])->name('usuario-permisos.show')->middleware('permiso:usuarios_del_sistema,ver');
   Route::put('usuario-permisos/{usuarioPermiso}', [UsuarioPermisoController::class, 'update'])->name('usuario-permisos.update')->middleware('permiso:usuarios_del_sistema,editar');
-  Route::patch('usuario-permisos/{usuarioPermiso}', [UsuarioPermisoController::class, 'update'])->name('usuario-permisos.update')->middleware('permiso:usuarios_del_sistema,editar');
+  Route::patch('usuario-permisos/{usuarioPermiso}', [UsuarioPermisoController::class, 'update'])->middleware('permiso:usuarios_del_sistema,editar');
   Route::delete('usuario-permisos/{usuarioPermiso}', [UsuarioPermisoController::class, 'destroy'])->name('usuario-permisos.destroy')->middleware('permiso:usuarios_del_sistema,eliminar');
 
   // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

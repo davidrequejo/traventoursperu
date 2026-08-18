@@ -185,6 +185,15 @@
       .reserva-modal .modal-header {
         border-bottom: 1px solid var(--reserva-border);
       }
+
+      #modal-asociar-comprobante-reserva .select2-container--bootstrap4 .select2-results__option--highlighted,
+      #modal-asociar-comprobante-reserva .select2-container--bootstrap4 .select2-results__option--highlighted .text-muted {
+        color: #fff !important;
+      }
+
+      #modal-asociar-comprobante-reserva .select2-container--bootstrap4 .select2-results__option--highlighted .fw-semibold {
+        color: #fff !important;
+      }
       #tabla-reserva_filter {
         width: 100% !important;
       }
@@ -1476,6 +1485,57 @@
                     <button type="button" class="btn btn-sm btn-success label-btn" id="guardar_registro_nuevo_pago_reserva"> <i class="bx bx-check"></i> AMORTIZAR</button>
                   </div>
 
+                </div>
+              </div>
+            </div>
+
+            <!-- MODAL - ASOCIAR COMPROBANTE -->
+            <div class="modal fade reserva-modal" id="modal-asociar-comprobante-reserva" tabindex="-1" aria-labelledby="label-asociar-comprobante-reserva" aria-hidden="true">
+              <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h6 class="modal-title fw-semibold" id="label-asociar-comprobante-reserva">
+                      <i class="ri-link-m text-primary me-1"></i> Asociar comprobante | <span id="cod-reserva-asociar">Reserva</span>
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                  </div>
+                  <div class="modal-body px-4">
+                    <input type="hidden" id="asociar_reserva_id">
+                    <input type="hidden" id="asociar_reserva_saldo">
+                    <input type="hidden" id="asociar_idrdocumento">
+
+                    <div class="row g-3">
+                      <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center gap-2 mb-1">
+                          <label for="select_comprobante_asociar" class="form-label mb-0">Comprobante suelto <span class="text-danger">*</span></label>
+                          <div class="form-check form-check-sm mb-0">
+                            <input class="form-check-input" type="checkbox" value="1" id="asociar_mostrar_todos_documentos">
+                            <label class="form-check-label fs-12" for="asociar_mostrar_todos_documentos">Mostrar todos</label>
+                          </div>
+                        </div>
+                        <select class="form-control" id="select_comprobante_asociar"></select>
+                        <small class="text-muted" id="asociar_comprobante_help">Solo aparecen documentos activos del cliente que estan en rdocumento y aun no estan asociados a una reserva.</small>
+                      </div>
+
+                      <div class="col-md-4">
+                        <label for="monto_comprobante_asociar" class="form-label">Monto a aplicar <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                          <span class="input-group-text">s/</span>
+                          <input type="number" step="0.01" min="0" class="form-control text-end" id="monto_comprobante_asociar">
+                        </div>
+                      </div>
+                      <div class="col-md-8">
+                        <label class="form-label">Comprobante seleccionado</label>
+                        <div class="form-control bg-light" id="texto_comprobante_asociar">-</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-sm btn-primary" id="btn-guardar-asociar-comprobante">
+                      <i class="ri-link-m me-1"></i> Asociar
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

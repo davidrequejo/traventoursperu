@@ -35,4 +35,8 @@ return [
             '08' => 'nota_debito',
         ],
     ],
+
+    'alerts' => [
+        'emails' => array_filter(array_map('trim', explode(',', (string) env('SUNAT_ALERT_EMAILS', env('SUNAT_ALERT_EMAIL', ''))))),
+    ],
 ];

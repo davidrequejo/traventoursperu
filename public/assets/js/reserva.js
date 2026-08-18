@@ -57,6 +57,12 @@ const ReservaEndpoints = Object.freeze({
   impresionComprobante: function (documentoId, formato) {
     return `/facturacion/${documentoId}/impresion/${formato}`;
   },
+  comprobantesAsociables: function (reservaId) {
+    return `/reservas/${reservaId}/comprobantes-asociables`;
+  },
+  asociarComprobante: function (reservaId) {
+    return `/reservas/${reservaId}/asociar-comprobante`;
+  },
   detalleComprobante: function (reservaId) {
     return `/reservas/${reservaId}/detalle-comprobante`;
   },
@@ -411,6 +417,18 @@ function inicializarEventosReserva() {
   $('#btn-recargar-reservas').on('click', function () { cargando_search(); filtros(); });
   $('#guardar_registro_nuevo_cliente').on('click', function () { if ($(this).hasClass('send-data') == false) { $('#submit-form-nuevo-cliente').submit(); } else { toastr_info('Espere!!', 'Por favor sea pasiente se estan procesando los datos...'); } });
   $('#guardar_registro_nuevo_pago_reserva').on('click', function () { if ($(this).hasClass('send-data') == false) { $('#submit-form-reserva_pago').submit(); } else { toastr_info('Espere!!', 'Por favor sea pasiente se estan procesando los datos...'); } });
+  $('#btn-guardar-asociar-comprobante').on('click', guardarAsociacionComprobanteReserva);
+  $('#asociar_mostrar_todos_documentos').on('change', function () {
+    const idreserva = Number($('#asociar_reserva_id').val() || 0);
+    $('#asociar_idrdocumento').val('');
+    $('#monto_comprobante_asociar').val('');
+    $('#texto_comprobante_asociar').text('-');
+    inicializarSelectComprobanteAsociarReserva(idreserva);
+    $('#select_comprobante_asociar').val(null).trigger('change');
+  });
+  $('#select_comprobante_asociar').on('select2:select', function (event) {
+    seleccionarComprobanteAsociarReserva(event.params.data);
+  });
 
   $(ReservaSelectors.filtroCliente).select2({ templateResult: templateCliente, theme: 'bootstrap4', placeholder: 'Seleccione', allowClear: true });
   cargarSelect2Reserva(apiUrlReserva(ReservaEndpoints.clientes), ReservaSelectors.filtroCliente, null, '.charge_filtro_cliente', false).always(function () {
@@ -2953,6 +2971,179 @@ function eliminarPagoReserva(idrdocumento) {
         ver_errores(jqXhr);
       }
     });
+  });
+}
+
+function abrirModalAsociarComprobanteReserva(idreserva, saldoPendiente) {
+  const reservaId = Number(idreserva || 0);
+  const saldo = Number.parseFloat(saldoPendiente || 0) || 0;
+
+  if (!reservaId) {
+    toastr_error('Error', 'No se pudo identificar la reserva.');
+    return;
+  }
+
+  $('#asociar_reserva_id').val(reservaId);
+  $('#asociar_reserva_saldo').val(saldo.toFixed(2));
+  $('#asociar_idrdocumento').val('');
+  $('#monto_comprobante_asociar').val('');
+  $('#texto_comprobante_asociar').text('-');
+  $('#asociar_mostrar_todos_documentos').prop('checked', false);
+  actualizarHelpComprobanteAsociarReserva();
+  $('#cod-reserva-asociar').text('Reserva #' + reservaId);
+
+  inicializarSelectComprobanteAsociarReserva(reservaId);
+  $('#select_comprobante_asociar').val(null).trigger('change');
+  $('#modal-asociar-comprobante-reserva').modal('show');
+}
+
+function inicializarSelectComprobanteAsociarReserva(idreserva) {
+  const $select = $('#select_comprobante_asociar');
+  const mostrarTodos = $('#asociar_mostrar_todos_documentos').is(':checked');
+
+  actualizarHelpComprobanteAsociarReserva();
+
+  if ($select.hasClass('select2-hidden-accessible')) {
+    $select.select2('destroy');
+  }
+
+  $select.empty().select2({
+    theme: 'bootstrap4',
+    width: '100%',
+    allowClear: true,
+    dropdownParent: $('#modal-asociar-comprobante-reserva'),
+    placeholder: 'Seleccione comprobante suelto',
+    ajax: {
+      url: apiUrlReserva(ReservaEndpoints.comprobantesAsociables(idreserva)),
+      dataType: 'json',
+      delay: 250,
+      cache: false,
+      data: function (params) {
+        return {
+          term: params.term || '',
+          todos: mostrarTodos ? 1 : 0,
+        };
+      },
+      processResults: function (response) {
+        response = normalizarRespuestaReserva(response);
+        const rows = response.data || [];
+
+        return {
+          results: rows.map(function (row) {
+            const total = Number.parseFloat(row.disponible || row.total || 0) || 0;
+            const comprobante = row.comprobante || '-';
+            const tipo = row.tipo || '-';
+            const fecha = row.fecha_emision || '-';
+
+            return {
+              id: row.idrdocumento,
+              text: `${comprobante} | ${tipo} | ${fecha} | ${row.cliente || '-'} | S/ ${total.toFixed(2)}`,
+              comprobante: comprobante,
+              disponible: total,
+              cliente: row.cliente || '-',
+              sunat_estado: row.sunat_estado || '-',
+            };
+          }),
+        };
+      },
+    },
+    templateResult: templateComprobanteAsociarReserva,
+    templateSelection: templateComprobanteAsociarSeleccionReserva,
+  });
+}
+
+function actualizarHelpComprobanteAsociarReserva() {
+  const mostrarTodos = $('#asociar_mostrar_todos_documentos').is(':checked');
+  $('#asociar_comprobante_help').text(mostrarTodos
+    ? 'Aparecen todos los documentos activos en rdocumento que aun no estan asociados a una reserva.'
+    : 'Solo aparecen documentos activos del cliente que estan en rdocumento y aun no estan asociados a una reserva.');
+}
+
+function templateComprobanteAsociarReserva(item) {
+  if (!item.id) return item.text;
+
+  return $(`
+    <div>
+      <div class="fw-semibold">${escapeHtmlReserva(item.comprobante || item.text)}</div>
+      <div class="fs-11 text-muted">${escapeHtmlReserva(item.cliente || '-')} | ${escapeHtmlReserva(item.sunat_estado || '-')}</div>
+    </div>
+  `);
+}
+
+function templateComprobanteAsociarSeleccionReserva(item) {
+  return item.comprobante || item.text || '';
+}
+
+function seleccionarComprobanteAsociarReserva(item) {
+  const saldo = Number.parseFloat($('#asociar_reserva_saldo').val() || 0) || 0;
+  const idrdocumento = Number(item?.id || 0);
+  const totalDisponible = Number.parseFloat(item?.disponible || 0) || 0;
+  const monto = Math.min(saldo > 0 ? saldo : totalDisponible, totalDisponible);
+
+  $('#asociar_idrdocumento').val(idrdocumento);
+  $('#texto_comprobante_asociar').text(item?.text || item?.comprobante || '-');
+  $('#monto_comprobante_asociar').val(monto > 0 ? monto.toFixed(2) : '');
+}
+
+function guardarAsociacionComprobanteReserva() {
+  const idreserva = Number($('#asociar_reserva_id').val() || 0);
+  const idrdocumento = Number($('#asociar_idrdocumento').val() || 0);
+  const monto = Number.parseFloat($('#monto_comprobante_asociar').val() || 0) || 0;
+  const $button = $('#btn-guardar-asociar-comprobante');
+
+  if (!idreserva || !idrdocumento) {
+    toastr_error('Error', 'Seleccione un comprobante para asociar.');
+    return;
+  }
+
+  if (monto <= 0) {
+    toastr_error('Error', 'Ingrese un monto valido.');
+    return;
+  }
+
+  $button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Asociando...');
+
+  $.ajax({
+    url: apiUrlReserva(ReservaEndpoints.asociarComprobante(idreserva)),
+    type: 'POST',
+    data: {
+      idrdocumento: idrdocumento,
+      monto_cuota: monto,
+    },
+    success: function (response) {
+      response = normalizarRespuestaReserva(response);
+
+      if (!response.status) {
+        ver_errores(response);
+        return;
+      }
+
+      Swal.fire('Correcto!', response.message || 'Comprobante asociado correctamente.', 'success');
+      $('#modal-asociar-comprobante-reserva').modal('hide');
+      mostrar_detalle(idreserva, nombre_cliente_para_amortizar, apellido_cliente_para_amortizar, documento_cliente_para_amortizar, doc_cliente_para_amortizar);
+
+      if (typeof tabla_reserva !== 'undefined' && tabla_reserva) {
+        tabla_reserva.ajax.reload(null, false);
+      }
+    },
+    error: function (jqXhr) {
+      ver_errores(jqXhr);
+    },
+    complete: function () {
+      $button.prop('disabled', false).html('<i class="ri-link-m me-1"></i> Asociar');
+    }
+  });
+}
+
+function escapeHtmlReserva(value) {
+  return String(value ?? '').replace(/[&<>"']/g, function (character) {
+    return {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[character];
   });
 }
 // .....::::::::::::::::::::::::::::::::::::: F U N C I O N E S    A L T E R N A S  :::::::::::::::::::::::::::::::::::::::..

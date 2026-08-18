@@ -15,12 +15,15 @@ use Endroid\QrCode\Writer\PngWriter;
 use App\Models\CuentaBancaria;
 use App\Models\Empresa;
 use App\Models\Persona;
+use App\Models\PersonaTipo;
+use App\Models\PersonaTipoPersona;
 use App\Models\Producto;
 use App\Models\RDocumento;
 use App\Models\RDocumentoArchivo;
 use App\Models\SerieComprobante;
 use App\Models\SunatC01TipoComprobante;
 use App\Models\SunatC09CodigoNotaCredito;
+use App\Models\SunatC06DocIdentidad;
 use App\Services\FacturacionElectronica\SunatFacturacionService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -273,6 +276,78 @@ class FacturacionController extends Controller
                 'more' => ($offset + $clientes->count()) < $total,
             ],
         ]);
+    }
+
+    public function storeClienteRapido(Request $request)
+    {
+        $validated = $request->validate([
+            'tipo_persona_sunat' => ['required', Rule::in(['NATURAL', 'JURIDICA'])],
+            'codigo_documento_sunat' => ['required', Rule::in(['1', '6'])],
+            'numero_documento' => ['required', 'string', 'max:20', Rule::unique('persona', 'numero_documento')],
+            'descripcion' => ['required', 'string', 'max:255'],
+            'celular' => ['nullable', 'string', 'max:15'],
+            'correo' => ['nullable', 'email', 'max:255'],
+            'direccion' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        if ($validated['codigo_documento_sunat'] === '6' && strlen(trim($validated['numero_documento'])) !== 11) {
+            return ApiResponse::fail('El RUC debe tener 11 digitos.', 422);
+        }
+
+        if ($validated['codigo_documento_sunat'] === '1' && strlen(trim($validated['numero_documento'])) !== 8) {
+            return ApiResponse::fail('El DNI debe tener 8 digitos.', 422);
+        }
+
+        $tipoDocumento = SunatC06DocIdentidad::query()
+            ->where('estado_trash', '1')
+            ->where('code_sunat', $validated['codigo_documento_sunat'])
+            ->first();
+
+        if (! $tipoDocumento) {
+            return ApiResponse::fail('No se encontro el tipo de documento SUNAT configurado.', 422);
+        }
+
+        $tipoCliente = PersonaTipo::query()
+            ->where('estado_trash', '1')
+            ->where('nombre', 'CLIENTE')
+            ->first();
+
+        if (! $tipoCliente) {
+            return ApiResponse::fail('No se encontro el tipo de persona CLIENTE configurado.', 422);
+        }
+
+        $persona = DB::transaction(function () use ($validated, $tipoDocumento, $tipoCliente, $request) {
+            $persona = Persona::create([
+                'tipo_persona_sunat' => $validated['tipo_persona_sunat'],
+                'tipo_documento' => $tipoDocumento->idsunat_c06_doc_identidad,
+                'numero_documento' => trim($validated['numero_documento']),
+                'descripcion' => trim($validated['descripcion']),
+                'celular' => $validated['celular'] ?? null,
+                'correo' => $validated['correo'] ?? null,
+                'direccion' => $validated['direccion'] ?? null,
+                'estado_trash' => '1',
+                'user_trash' => null,
+                'user_created' => $request->user()?->id,
+                'user_updated' => $request->user()?->id,
+            ]);
+
+            PersonaTipoPersona::create([
+                'idpersona' => $persona->idpersona,
+                'idpersona_tipo' => $tipoCliente->idpersona_tipo,
+                'user_created' => $request->user()?->id,
+                'user_updated' => $request->user()?->id,
+            ]);
+
+            return $persona->load('docIdentidad:idsunat_c06_doc_identidad,abreviatura');
+        });
+
+        $nombre = $this->resolverNombrePersona($persona);
+        $documento = $this->resolverDocumentoPersona($persona);
+
+        return ApiResponse::success([
+            'id' => (int) $persona->idpersona,
+            'text' => trim($nombre . ($documento !== '' ? " - {$documento}" : '')),
+        ], 'Cliente registrado correctamente.');
     }
 
     public function catalogosCreacion(Request $request)

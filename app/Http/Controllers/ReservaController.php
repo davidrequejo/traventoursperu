@@ -517,6 +517,46 @@ class ReservaController extends Controller
         return ApiResponse::success($pago, 'Pago eliminado correctamente.');
     }
 
+    public function comprobantesAsociables(Request $request, Reserva $reserva)
+    {
+        $rows = $this->reservaPagoService
+            ->comprobantesAsociables(
+                (int) $reserva->idreserva,
+                $request->input('term'),
+                $request->boolean('todos')
+            )
+            ->map(function (RDocumento $documento) {
+                $comprobante = trim(($documento->serie_comprobante ?? '') . '-' . ($documento->numero_comprobante ?? ''));
+
+                return [
+                    'idrdocumento' => (int) $documento->idrdocumento,
+                    'comprobante' => $comprobante,
+                    'tipo' => $documento->tipoComprobanteSunat?->abreviatura ?? $documento->tipo_comprobante ?? '-',
+                    'fecha_emision' => optional($documento->fecha_emision)->format('d/m/Y'),
+                    'cliente' => $documento->cliente?->descripcion ?? '-',
+                    'total' => number_format((float) $documento->venta_total, 2, '.', ''),
+                    'disponible' => number_format((float) ($documento->monto_disponible_reserva ?? $documento->venta_total), 2, '.', ''),
+                    'sunat_estado' => $documento->sunat_estado ?: '-',
+                ];
+            })
+            ->values();
+
+        return ApiResponse::success($rows);
+    }
+
+    public function asociarComprobante(Request $request, Reserva $reserva)
+    {
+        $data = $request->validate([
+            'idrdocumento' => ['required', 'integer', 'exists:rdocumento,idrdocumento'],
+            'monto_cuota' => ['required', 'numeric', 'gt:0'],
+        ]);
+        $data['idreserva'] = (int) $reserva->idreserva;
+
+        $relacion = $this->reservaPagoService->asociarComprobante($data, $this->usuarioId($request));
+
+        return ApiResponse::success($relacion, 'Comprobante asociado correctamente.');
+    }
+
     public function bancos()
     {
         $cuentas = CuentaBancaria::query()

@@ -55,8 +55,8 @@
     .totals-table td { height: 26px; padding: 5px 8px; }
     .total-label { width: 52%; background: #aaa; color: #fff; text-align: center; border-radius: 7px; }
     .total-value { width: 48%; border: 2px solid #bdbdbd; border-radius: 7px; text-align: right; color: #5f5f5f; }
-    .grand-total-label { background: #1eb2d6; color: #fff; }
-    .grand-total-value { border-color: #1eb2d6; color: #009ed0; }
+    .grand-total-label { background: #456b4e; color: #fff; }
+    .grand-total-value { border-color: #456b4e; color: #456b4e; }
     .footer-note { text-align: center; font-size: 10px; margin-top: 18px; color: #666; }
     @media print {
       body { background: #fff !important; }
