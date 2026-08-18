@@ -103,3 +103,18 @@ php artisan event:clear
 
 ## Levantar assets en modo desarrollo.
 npm run dev
+
+
+
+php artisan config:clear
+php artisan view:clear
+
+modolo local
+para ver cuantos pediente hay 
+php artisan facturacion:enviar-pendientes --dry-run --all --limit=10
+para enviar 
+php artisan facturacion:enviar-pendientes --all --limit=10
+
+configuracion para el crom
+
+/usr/local/bin/php /home/jdlpe/traventoursperu.jdl.pe/artisan facturacion:enviar-pendientes --all --limit=10 >> /dev/null 2>&1
